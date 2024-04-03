@@ -1,49 +1,60 @@
-Overview
-========
+# Assignment Tasks
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+## Task 1: DataFetch Pipeline
 
-Project Contents
-================
+### Overview:
+The DataFetch Pipeline is designed to fetch data files from a specific URL, randomly select a specified number of files, download them, zip them into an archive, and move the archive to a target location.
 
-Your Astro project contains the following files and folders:
+### Sub Tasks:
+- **Fetch Data**
+  - Fetch the page containing the location wise datasets for that year. (Bash Operator with wget or curl command)command.
+  - Stores the fetched page as an HTML file.
+- **Select Files**
+  - select_rand_files
+  - Based on the required number of data files, select the data files randomly from the available list of files
+- **Downlad Files**
+  - file_download, fetch_ind_files
+  - Fetch the individual data files
+- **Zip Files**
+  - zip_files
+  - Zip them into an archive.
+- **Move Archive**
+  - move_archive_loc
+  - Place the archive at a required location.
 
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes two example DAGs:
-    - `example_dag_basic`: This DAG shows a simple ETL data pipeline example with three TaskFlow API tasks that run daily.
-    - `example_dag_advanced`: This advanced DAG showcases a variety of Airflow features like branching, Jinja templates, task groups and several Airflow operators.
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+### DAG Configuration:
+- DAG ID: ncei_data_fetch
+- Owner: admin
+- description: A data fetch pipeline
+- Start Date: 2024-01-01
+- Retries: 1
 
-Deploy Your Project Locally
-===========================
+## Task 2: Analytic Pipeline
 
-1. Start Airflow on your local machine by running 'astro dev start'.
+### Overview:
+The Analytic Pipeline performs data analytics and visualization on the fetched data files. It waits for the archive to be available, unzips the archive, extracts CSV contents, filters data, computes monthly averages, and creates visualizations using geopandas.
 
-This command will spin up 4 Docker containers on your machine, each for a different Airflow component:
+### Sub Tasks:
+- **Wait For Archive**
+  - Wait for the archive to be available (with a timeout of 5 secs) at the destined location. 
+  - If the wait has timed out, stop the pipeline.
+- **Unzip Archive**
+  - Upon the availability (status=success), check if the file is a valid archive followed by unzipthe contents into individual CSV files.
+- **Process CSV Files**
+  - Extract the contents of the CSV into a data frame and filter the dataframe based on the required fields such Windspeed or BulbTemperature, etc. Extract also the Lat/Long values from the CSV to create a tuple of the form <Lat, Lon, [[ArrayOfHourlyDataOfTheReqFields]]>.
+- **Compute Monthly Averages**
+  - Compute the monthly averages of the required fields.
+  - The output will be of the form <Lat, Long, [[Avg_11, ..., Avg_1N] .. [Avg_M1, ..., Avg_MN]]> for N fields and M months.
+- **Create Visualization**
+  - Create a visualization where you plot the required fields (one per field) using heatmaps at different lat/lon positions.
+  - Export the plots to PNG.
+- **Delete CSV File**
+  - Upon successful completion, delete the CSV file from the destined location.
 
-- Postgres: Airflow's Metadata Database
-- Webserver: The Airflow component responsible for rendering the Airflow UI
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- Triggerer: The Airflow component responsible for triggering deferred tasks
-
-2. Verify that all 4 Docker containers were created by running 'docker ps'.
-
-Note: Running 'astro dev start' will start your project with the Airflow Webserver exposed at port 8080 and Postgres exposed at port 5432. If you already have either of those ports allocated, you can either [stop your existing Docker containers or change the port](https://docs.astronomer.io/astro/test-and-troubleshoot-locally#ports-are-not-available).
-
-3. Access the Airflow UI for your local Airflow project. To do so, go to http://localhost:8080/ and log in with 'admin' for both your Username and Password.
-
-You should also be able to access your Postgres Database at 'localhost:5432/postgres'.
-
-Deploy Your Project to Astronomer
-=================================
-
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://docs.astronomer.io/cloud/deploy-code/
-
-Contact
-=======
-
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+### DAG Configuration:
+- DAG ID: analytics_pipeline
+- Owner: airflow
+- Description: Analytics pipeline for data visualization
+- Start Date: 2024-01-01
+- Retries: 1
+- 'retry_delay': 5 minutes
