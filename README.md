@@ -3,7 +3,7 @@
 ## Task 1: DataFetch Pipeline
 
 ### Overview:
-The DataFetch Pipeline is designed to fetch data files from a specific URL, randomly select a specified number of files, download them, zip them into an archive, and move the archive to a target location.
+The DataFetch Pipeline is developed to retrieve data files from a specific URL, randomly pick a designated number of files, download them, compress them into an archive, and transfer the archive to a specified location.
 
 ### Sub Tasks:
 - **Fetch Data**
@@ -32,7 +32,7 @@ The DataFetch Pipeline is designed to fetch data files from a specific URL, rand
 ## Task 2: Analytic Pipeline
 
 ### Overview:
-The Analytic Pipeline performs data analytics and visualization on the fetched data files. It waits for the archive to be available, unzips the archive, extracts CSV contents, filters data, computes monthly averages, and creates visualizations using geopandas.
+The Analytic Pipeline conducts data analysis and visualization on the acquired data files. It waits for the archive to become available, extracts the contents of the archive, filters data, calculates monthly averages, and generates visualizations using geopandas.
 
 ### Sub Tasks:
 - **Wait For Archive**
